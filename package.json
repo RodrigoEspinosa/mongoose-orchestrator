@@ -1,17 +1,21 @@
 {
   "name": "mongoose-orchestrator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d lib"
   },
   "author": "rec",
   "license": "MIT",
   "dependencies": {
     "mongoose": "^3.8.39"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.5.0"
   }
 }
