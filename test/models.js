@@ -1,16 +1,13 @@
-'use strict';
-
 const mongoose = require('mongoose');
-const mongooseOrchestrator = require('../index');
+
 const ObjectId = mongoose.Schema.Types.ObjectId;
+const mongooseOrchestrator = require('../lib/index');
 
 // Create and register the `Season` model.
 
 const SeasonSchema = new mongoose.Schema({
 
-  name: {type: String, required: true},
-
-  episodes: {type: Number, required: false}
+  name: {type: String, required: true}
 
 });
 
@@ -24,8 +21,7 @@ const EpisodeSchema = new mongoose.Schema({
   name: {type: String, required: true},
 
   season: {type: ObjectId, ref: 'Season'},
-  seasonName: {type: String, ref: 'Season.name', sync: true},
-  seasonEpisodes: {type: Number, ref: 'Season.episodes', sync: false}
+  seasonName: {type: String, ref: 'Season.name', sync: true}
 
 });
 
