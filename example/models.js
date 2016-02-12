@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const mongooseOrchestrator = require('../index');
+const mongooseOrchestrator = require('../src/index');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 // Create and register the `Season` model.

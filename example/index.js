@@ -3,7 +3,7 @@
 // Initialize the mongoose connection.
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/mongoose_orchestrator_testing');
+mongoose.connect('mongodb://localhost/mongoose_orchestrator_example');
 
 
 // Initialize the models.

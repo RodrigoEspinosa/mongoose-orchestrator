@@ -2,13 +2,7 @@
 
 const mongoose = require('mongoose');
 
-/**
- * Join a iterator with given link or use ',' as default.
- * @param  {Object} iterator
- * @param  {String} link=',' [description]
- * @return {String}
- */
-const joinIterator = (iterator, link=',') => Array.from(iterator).join(link);
+import {joinIterator, getModelBySchema} from './utils';
 
 /**
  * Mongoose plugin to keep references to attributes synchronized.
@@ -107,10 +101,56 @@ const orchestratorPlugin = function(schema) {
     return Promise.all(promises).then(() => done()).catch(console.error);
   };
 
+
+  /**
+   * Post-save flow for the instance that modifies an
+   * attribute is required to be `sync` by another schemas.
+   */
+  const onPostSave = function() {
+    // TODO -- this.isModified
+
+    // Get the model name from the instance.
+    const sourceModelName = this.constructor.modelName;
+
+    // Get the attributes to sync.
+    let attrsToSync = modelsToSync.get(sourceModelName);
+
+    // Get the model needed to be updated.
+    const targetModel = getModelBySchema(schema);
+
+    let sourceId = {};
+    // TODO -- Should be dynamic.
+    sourceId[sourceModelName.toLowerCase()] = this._id;
+
+    // Set an object with the attributes to be updated and their values.
+
+    const toUpdate = {};
+
+    for(let [targetAttribute, sourceAttribute] of attrsToSync) {
+      toUpdate[targetAttribute] = this[sourceAttribute];
+    }
+
+    // Run the query to update those values.
+    targetModel.update(sourceId, toUpdate, (err, result) => {
+      if (err) {
+        console.error(err);
+      }
+    });
+  };
+
+
   // Set the `pre-save` hook on the current schema.
   schema.pre('save', onPreSave);
 
-  // TODO -- Set the `post-save` hook on the referenced schemas.
+  // Set the `post-save` hook on the source schema.
+  for (let sourceModel of modelsToSync.keys()) {
+    // Get the source schema.
+    let sourceSchema = mongoose.models[sourceModel].schema;
+
+    // Attach the `post-save` hook.
+    sourceSchema.post('save', onPostSave);
+  }
+
 };
 
-module.exports = exports = orchestratorPlugin;
+export default orchestratorPlugin;

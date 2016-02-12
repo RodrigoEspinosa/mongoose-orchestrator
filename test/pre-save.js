@@ -1,14 +1,5 @@
 import { expect } from 'chai';
-
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/mongoose_orchestrator_testing');
-
-// Require the test models.
-import './models';
-
-const Season = mongoose.models.Season;
-const Episode = mongoose.models.Episode;
-
+import { Season, Episode } from './models';
 
 describe('Pre-save', function() {
 
@@ -18,7 +9,7 @@ describe('Pre-save', function() {
 
   before(function(done) {
     // Create a sample season.
-    testData.season = new Season({name: 'Testing Season'})
+    testData.season = new Season({name: 'Testing Season'});
     testData.season.save(done);
   });
 
@@ -48,7 +39,7 @@ describe('Pre-save', function() {
     });
   });
 
-  it('should not sync an {sync: false} field', function() {
+  it('should not sync a `sync: false` field', function() {
 
     // Create an episode and save it.
     const episode = new Episode({
