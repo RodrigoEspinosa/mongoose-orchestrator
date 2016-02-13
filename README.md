@@ -1,7 +1,7 @@
 # mongoose-orchestrator
 
 
-**Keep [references to attributes](#references to attributes) synchronized.**
+**Keep your _references to attributes_ synchronized.**
 
 
 ---
@@ -25,13 +25,58 @@ const UserSchema = mongoose.Schema({
 
   country: { type: ObjectId, ref: 'Country' },
   countryName: { type: String, ref: 'Country.name', sync: true }
-
 });
 
 UserSchema.plugin(require('mongoose-orchestrator'));
-
-const User = mongoose.model('User', UserSchema);
 ```
+
+Use the key `sync: true` on your schema, that's the way `mongoose-orchestrator` will look for attributes that needs to be synchronized.
+
+Have an attribute with a lowercased version of the model name.
+
+The `ref` key on the attributes object means the attribute to lookup, using the following nomenclature: `<<MODEL_NAME>>.<<ATTRIBUTE_NAME>>`. For example, `Country.name` means the attribute `name` in the `Country` model.
+
+Require the `mongoose-orchestrator` plugin for the schema.
+
+
+
+## Example
+
+```js
+const mongoose = require('mongoose');
+const mongooseOrchestrator = require('mongoose-orchestrator');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
+// Create and register the `Season` model.
+
+const SeasonSchema = new mongoose.Schema({
+
+  name: {type: String, required: true}
+
+});
+
+mongoose.model('Season', SeasonSchema);
+
+
+// Create and register the `Episode` model.
+
+const EpisodeSchema = new mongoose.Schema({
+
+  name: {type: String, required: true},
+
+  season: {type: ObjectId, ref: 'Season'},
+  seasonName: {type: String, ref: 'Season.name', sync: true}
+
+});
+
+EpisodeSchema.plugin(mongooseOrchestrator);
+
+mongoose.model('Episode', EpisodeSchema);
+```
+
+**Under the hood...**
+![mongoose-orchestrator-events-example](https://dl.dropboxusercontent.com/u/73676286/GitHub/mongoose-orchestrator-events-example.gif)
+
 
 ## Limitations
 
