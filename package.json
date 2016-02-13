@@ -1,16 +1,28 @@
 {
   "name": "mongoose-orchestrator",
   "version": "0.0.2",
-  "description": "",
+  "description": "On the fly references to attributes synchronisation.",
   "main": "./lib/index.js",
-  "directories": {
-    "example": "example"
-  },
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
+    "prepublish": "npm run build",
     "build": "babel src -d lib"
   },
-  "author": "rec",
+  "author": "rec <yo@rec.cool>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RodrigoEspinosa/mongoose-orchestrator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/RodrigoEspinosa/mongoose-orchestrator/issues"
+  },
+  "homepage": "https://github.com/RodrigoEspinosa/mongoose-orchestrator",
+  "keywords": [
+    "mongoose",
+    "references",
+    "attributes",
+    "orchestrator"
+  ],
   "license": "MIT",
   "dependencies": {
     "mongoose": "^3.8.39"
