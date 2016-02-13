@@ -1,4 +1,4 @@
-# mongoose-orchestrator
+![mongoose-orchestrator](https://dl.dropboxusercontent.com/u/73676286/GitHub/mongoose-orchestrator-name.jpeg)
 
 
 **Keep your _references to attributes_ synchronized.**
