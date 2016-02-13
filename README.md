@@ -3,7 +3,6 @@
 
 **Keep your _references to attributes_ synchronized.**
 
-
 ---
 
 ## Install
@@ -30,11 +29,14 @@ const UserSchema = mongoose.Schema({
 UserSchema.plugin(require('mongoose-orchestrator'));
 ```
 
-Use the key `sync: true` on your schema, that's the way `mongoose-orchestrator` will look for attributes that needs to be synchronized.
+Use the key `sync: true` on your schema, that's the way `mongoose-orchestrator`
+will look for attributes that needs to be synchronized.
 
 Have an attribute with a lowercased version of the model name.
 
-The `ref` key on the attributes object means the attribute to lookup, using the following nomenclature: `<<MODEL_NAME>>.<<ATTRIBUTE_NAME>>`. For example, `Country.name` means the attribute `name` in the `Country` model.
+The `ref` key on the attributes object means the attribute to lookup, using the
+following nomenclature: `<<MODEL_NAME>>.<<ATTRIBUTE_NAME>>`. For example,
+`Country.name` means the attribute `name` in the `Country` model.
 
 Require the `mongoose-orchestrator` plugin for the schema.
 

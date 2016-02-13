@@ -1,10 +1,10 @@
 {
   "name": "mongoose-orchestrator",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "On the fly references to attributes synchronisation.",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-register",
     "prepublish": "npm run build",
     "build": "babel src -d lib"
   },
@@ -28,7 +28,9 @@
     "mongoose": "^3.8.39"
   },
   "devDependencies": {
+    "babel-cli": "^6.5.1",
     "babel-preset-es2015": "^6.5.0",
+    "babel-register": "^6.5.2",
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
   }
