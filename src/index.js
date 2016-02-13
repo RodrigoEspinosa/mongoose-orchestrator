@@ -49,7 +49,7 @@ const orchestratorPlugin = function(schema) {
    * each attribute that was required in the schema with the `sync` flag.
    * @param  {Function} done
    */
-  const onPreSave = function(done) {
+  const onSchemaPreSave = function(done) {
 
     /**
      * Get the instance of the requested model based on the
@@ -106,9 +106,7 @@ const orchestratorPlugin = function(schema) {
    * Post-save flow for the instance that modifies an
    * attribute is required to be `sync` by another schemas.
    */
-  const onPostSave = function() {
-    // TODO -- this.isModified
-
+  const onSourcePreSave = function(done) {
     // Get the model name from the instance.
     const sourceModelName = this.constructor.modelName;
 
@@ -127,28 +125,32 @@ const orchestratorPlugin = function(schema) {
     const toUpdate = {};
 
     for(let [targetAttribute, sourceAttribute] of attrsToSync) {
-      toUpdate[targetAttribute] = this[sourceAttribute];
+      // Add the attribute to the update list if this was modified.
+      if(this.isModified(sourceAttribute)) {
+        toUpdate[targetAttribute] = this[sourceAttribute];
+      }
     }
 
-    // Run the query to update those values.
-    targetModel.update(sourceId, toUpdate, (err, result) => {
-      if (err) {
-        console.error(err);
-      }
-    });
+    // Check if there is anything to update.
+    if (Object.keys(toUpdate).length) {
+      // Run the query to update those values.
+      targetModel.update(sourceId, toUpdate, done);
+    } else {
+      done(null, this);
+    }
   };
 
 
   // Set the `pre-save` hook on the current schema.
-  schema.pre('save', onPreSave);
+  schema.pre('save', onSchemaPreSave);
 
-  // Set the `post-save` hook on the source schema.
+  // Set the `pre-save` hook on the source schema.
   for (let sourceModel of modelsToSync.keys()) {
     // Get the source schema.
     let sourceSchema = mongoose.models[sourceModel].schema;
 
     // Attach the `post-save` hook.
-    sourceSchema.post('save', onPostSave);
+    sourceSchema.pre('save', onSourcePreSave);
   }
 
 };
