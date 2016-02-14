@@ -9,6 +9,10 @@
 
 ---
 
+This project is continuously tested on **Node 0.12** and **Node 4.0**.
+Compatible with **Mongoose 3.8** and above.
+
+
 ## Install
 
 ```bash
