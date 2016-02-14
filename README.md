@@ -3,6 +3,10 @@
 
 **Keep your _references to attributes_ synchronized.**
 
+[![Build Status](https://travis-ci.org/RodrigoEspinosa/mongoose-orchestrator.svg?branch=master)](https://travis-ci.org/RodrigoEspinosa/mongoose-orchestrator)
+[![Dependency Status](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator.svg)](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator)
+[![devDependency Status](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator/dev-status.svg)](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator#info=devDependencies)
+
 ---
 
 ## Install
