@@ -50,7 +50,6 @@ const orchestratorPlugin = function(schema) {
    * @param  {Function} done
    */
   const onSchemaPreSave = function(done) {
-
     /**
      * Get the instance of the requested model based on the
      * instance lowercased attribute.
@@ -134,7 +133,7 @@ const orchestratorPlugin = function(schema) {
     // Check if there is anything to update.
     if (Object.keys(toUpdate).length) {
       // Run the query to update those values.
-      targetModel.update(sourceId, toUpdate, done);
+      targetModel.update(sourceId, toUpdate, {multi: true}, done);
     } else {
       done(null, this);
     }

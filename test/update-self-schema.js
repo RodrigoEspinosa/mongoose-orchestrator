@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import { Season, Episode } from './models';
 
-describe('Pre-save', function() {
+
+/**
+ * Describe tests for when the document changes and the values
+ * required to be synchronized should update as well.
+ */
+describe('When updating self schema', function() {
 
   const testData = {
     season: null
