@@ -1,4 +1,4 @@
-'use strict';
+import 'babel-polyfill';
 
 const mongoose = require('mongoose');
 
