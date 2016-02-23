@@ -50,6 +50,26 @@ following nomenclature: `<<MODEL_NAME>>.<<ATTRIBUTE_NAME>>`. For example,
 Require the `mongoose-orchestrator` plugin for the schema.
 
 
+**Specifying a source**
+
+The `source` keyword is the attribute of the instance where the reference will
+be stored. As default, is a lowercased version of the reference model.
+
+You can create a schema as the following:
+
+```js
+mongoose.Schema({
+
+  name: { type: String, required: true },
+
+  country: {
+    id: { type: ObjectId, ref: 'Country' },
+    name: { type: String, ref: 'Country.name', sync: true, source: 'country.id' }
+  }
+
+});
+```
+
 
 ## Example
 
@@ -92,22 +112,7 @@ mongoose.model('Episode', EpisodeSchema);
 ## Limitations
 
 - You can only use one model per schema.
-- You can't specify the attribute for the reference. It has to be a lowercased version of the source model.
 
-At the moment, you can't do this:
-
-```js
-mongoose.Schema({
-
-  name: { type: String, required: true },
-
-  country: {
-    id: { type: ObjectId, ref: 'Country' },
-    name: { type: String, ref: 'Country.name', sync: true, source: 'country.id' }
-  }
-
-});
-```
 
 ## LICENSE
 
