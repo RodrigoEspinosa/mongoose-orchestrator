@@ -1,6 +1,6 @@
 {
   "name": "mongoose-orchestrator",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "On the fly references to attributes synchronisation.",
   "main": "./lib/index.js",
   "scripts": {
