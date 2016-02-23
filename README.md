@@ -109,10 +109,6 @@ mongoose.model('Episode', EpisodeSchema);
 ![mongoose-orchestrator-events-example](https://dl.dropboxusercontent.com/u/73676286/GitHub/mongoose-orchestrator-events-example.gif)
 
 
-## Limitations
-
-- You can only use one model per schema.
-
 
 ## LICENSE
 
