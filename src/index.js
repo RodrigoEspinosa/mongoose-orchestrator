@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 const mongoose = require('mongoose');
 
-import { getModelBySchema } from './utils';
+import { getModelsBySchema } from './utils';
 
 /**
  * Mongoose plugin to keep references to attributes synchronized.
@@ -150,7 +150,7 @@ const orchestratorPlugin = function(schema) {
     let pathsToSync = modelsToSync.get(sourceModelName);
 
     // Get the model needed to be updated.
-    const targetModel = getModelBySchema(schema);
+    const targetModels = getModelsBySchema(schema);
 
     const promises = new Set();
 
@@ -179,8 +179,10 @@ const orchestratorPlugin = function(schema) {
 
       update = {$set: update};
 
-      // Run the query to update those values.
-      promises.add(targetModel.update(find, update, {multi: true}));
+      for (let targetModel of targetModels) {
+        // Run the query to update those values.
+        promises.add(targetModel.update(find, update, {multi: true}));
+      }
     }
 
     return Promise.all(promises).then(done);
