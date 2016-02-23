@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Season, Episode } from './models';
+import { Show, Season, Episode } from './models';
 
 
 /**
@@ -9,13 +9,25 @@ import { Season, Episode } from './models';
 describe('When updating the source', function() {
 
   const testData = {
+    show: null,
     season: null,
     episode: null
   };
 
   before(function(done) {
+    // Create a sample show.
+    testData.show = new Show({
+      name: 'Testing Show',
+      episodes: 4
+    });
+
     // Create a sample season.
-    testData.season = new Season({name: 'Testing Season'});
+    testData.season = new Season({
+      name: 'Testing Season',
+      show: {
+        id: testData.show._id
+      }
+    });
 
     // Create a sample episode.
     testData.episode = new Episode({
@@ -23,12 +35,12 @@ describe('When updating the source', function() {
       season: testData.season
     });
 
-    // Save the season and episode.
-    testData.season.save((err, season) => {
-      expect(err).to.not.exist;
-
-      testData.episode.save(done);
-    });
+    // Save the show, season and episode.
+    testData.show.save()
+      .then(testData.season.save)
+      .then(testData.episode.save)
+      .then(() => done())
+      .catch((err) => expect(err).to.not.exist);
   });
 
   it('should update the episode if the season name changes', function(done) {

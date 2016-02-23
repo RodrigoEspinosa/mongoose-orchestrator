@@ -1,6 +1,6 @@
 {
   "name": "mongoose-orchestrator",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "On the fly references to attributes synchronisation.",
   "main": "./lib/index.js",
   "scripts": {
@@ -27,6 +27,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "lodash": "^4.3.0",
     "mongoose": "^4.4.3"
   },
   "devDependencies": {

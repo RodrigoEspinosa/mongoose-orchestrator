@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Season, Episode } from './models';
+import { Show, Season, Episode } from './models';
 
 
 /**
@@ -56,6 +56,23 @@ describe('When updating self schema', function() {
       expect(err).to.not.exist;
       expect(episode.seasonEpisodes).to.be.undefined;
     });
+  });
+
+  it('should update using references in nested documents', function(done) {
+    // Create a new show.
+    const show = new Show({name: 'Testing Show', seasons: 4});
+
+    // Create a new season.
+    const season = new Season({name: 'Testing season with Show', 'show.id': show._id});
+
+    show.save()
+      .then(season.save)
+      .then((season) => {
+        expect(season.show.title).to.equal('Testing Show');
+        expect(season.show.amountOfSeasons).to.equal(4);
+        done();
+      })
+      .catch(done);
   });
 
 });

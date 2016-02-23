@@ -1,8 +1,9 @@
 import 'babel-polyfill';
+import _ from 'lodash';
 
 const mongoose = require('mongoose');
 
-import {joinIterator, getModelBySchema} from './utils';
+import { getModelBySchema } from './utils';
 
 /**
  * Mongoose plugin to keep references to attributes synchronized.
@@ -14,10 +15,10 @@ const orchestratorPlugin = function(schema) {
   const modelsToSync = new Map();
 
   // Add the reference to the model.
-  const addPathToSync = function(modelName, pathName, referencedAttr) {
+  const addPathToSync = function(modelName, pathName, syncData) {
     // Get the model map and assign the new key.
     const modelMap = modelsToSync.has(modelName) ? modelsToSync.get(modelName) : new Map();
-    modelMap.set(pathName, referencedAttr);
+    modelMap.set(pathName, syncData);
 
     modelsToSync.set(modelName, modelMap);
   };
@@ -32,14 +33,21 @@ const orchestratorPlugin = function(schema) {
     if (hasSyncEnabled(pathName, schemaType)) {
       // Raise an error if the path does not has a reference, `ref` attribute.
       if (!schemaType.options.ref) {
-        new Error('ValidationError'); // TODO
+        // TODO -- Throw error.
+        new Error('ValidationError');
       }
 
       // Get the model and referenced attribute from the `ref`.
       const [model, attr] = schemaType.options.ref.split('.');
 
+      // Get the source attribute where the `ObjectId` for the specified model.
+      const source = schemaType.options.source || model.toLowerCase();
+
+      // Build the object with the data so it can synchronize.
+      const syncData = { attribute: attr, source: source };
+
       // Set the map for reference-to-attribute population.
-      addPathToSync(model, pathName, attr);
+      addPathToSync(model, pathName, syncData);
     }
   });
 
@@ -56,15 +64,57 @@ const orchestratorPlugin = function(schema) {
      * @param  {String} modelName
      * @return {Promise}
      */
-    const getReferenceInstance = (modelName) => {
-      // Get the reference to the specific document.
-      const documentId = this[modelName.toLowerCase()];
+    const getReferenceInstances = (modelName) => {
+      const ids = new Set();
+      const select = new Set();
 
-      // Get the values to select from the paths to be synced list.
-      const select = joinIterator(modelsToSync.get(modelName).values());
+      for (let syncData of modelsToSync.get(modelName).values()) {
+        // Get the reference to the specific document.
+        const documentId = _.get(this, syncData.source);
+
+        // Get the ids to fetch.
+        ids.add(documentId);
+
+        // Get the values to select from the paths to be synced list.
+        select.add(syncData.attribute);
+      }
 
       // Query the reference model.
-      return mongoose.model(modelName).findById(documentId, select).exec();
+      return mongoose.model(modelName)
+        .find({_id: {$in: [...ids]}})
+        .select([...select].join(' '))
+        .exec();
+    };
+
+    /**
+     * Set all the attributes for the current instance based on the
+     * reference.
+     * @param  {Object} reference
+     * @return {Promise}
+     */
+    const setReferences = (modelName) => {
+      return (references) => {
+
+        // Get the paths to sync for the current instance.
+        let pathsToSync = modelsToSync.get(modelName);
+
+        // Iterate over all the paths to sync.
+        for (let [ownPathToSync, syncData] of pathsToSync) {
+          const {attribute: sourceAttribute, source: idSource} = syncData;
+
+          // Get the corresponding reference based on the id.
+          const sourceId = _.get(this, idSource);
+          const reference = _.find(references, (reference) => {
+            return reference._id.equals(sourceId);
+          });
+
+          // Copy the value of the reference attribute to the current instance.
+          _.set(this, ownPathToSync, _.get(reference, sourceAttribute));
+        }
+
+        // Always resolve the promise.
+        return Promise.resolve();
+      };
     };
 
     // Set of promises of for populating all the instances.
@@ -72,28 +122,15 @@ const orchestratorPlugin = function(schema) {
 
     // Iterate over all the models that needs to be fetched.
     for (let modelName of modelsToSync.keys()) {
-      /**
-       * Set all the attributes for the current instance based on the
-       * reference.
-       * @param  {Object} reference
-       * @return {Promise}
-       */
-      const setReferences = (reference) => {
-        // Get the paths to sync for the current instance.
-        let pathsToSync = modelsToSync.get(modelName);
-
-        // Iterate over all the paths to sync.
-        for (let [ownPathToSync, referenceAttr] of pathsToSync) {
-          // Copy the value of the reference attribute to the current instance.
-          this[ownPathToSync] = reference[referenceAttr];
-        }
-
-        // Always resolve the promise.
-        return Promise.resolve();
-      };
+      // TODO -- Check if the instance is not new and no sync is required.
+      // for(let attr of modelsToSync.get(modelName).keys()) {
+      //   console.log(attr);
+      // }
 
       // Get the reference and then set the attributes to the current instance.
-      promises.add(getReferenceInstance(modelName).then(setReferences));
+      promises.add(
+        getReferenceInstances(modelName).then(setReferences(modelName))
+      );
     }
 
     // Complete the `pre-save` after populating all attributes from all references.
@@ -110,33 +147,43 @@ const orchestratorPlugin = function(schema) {
     const sourceModelName = this.constructor.modelName;
 
     // Get the attributes to sync.
-    let attrsToSync = modelsToSync.get(sourceModelName);
+    let pathsToSync = modelsToSync.get(sourceModelName);
 
     // Get the model needed to be updated.
     const targetModel = getModelBySchema(schema);
 
-    let sourceId = {};
-    // TODO -- Should be dynamic.
-    sourceId[sourceModelName.toLowerCase()] = this._id;
+    const promises = new Set();
 
     // Set an object with the attributes to be updated and their values.
+    const toUpdate = new Map();
 
-    const toUpdate = {};
+    // Iterate over all the paths to sync.
+    for (let [targetAttribute, syncData] of pathsToSync) {
+      const {attribute: sourceAttribute, source: idSource} = syncData;
 
-    for(let [targetAttribute, sourceAttribute] of attrsToSync) {
+      const toUpdateAttrs = toUpdate.get(idSource) || {};
+
       // Add the attribute to the update list if this was modified.
       if(this.isModified(sourceAttribute)) {
-        toUpdate[targetAttribute] = this[sourceAttribute];
+        const newValue = _.get(this, sourceAttribute);
+
+        _.set(toUpdateAttrs, targetAttribute, newValue);
       }
+
+      toUpdate.set(idSource, toUpdateAttrs);
     }
 
-    // Check if there is anything to update.
-    if (Object.keys(toUpdate).length) {
+
+    for (let [key, update] of toUpdate) {
+      const find = {}; find[key] = this._id;
+
+      update = {$set: update};
+
       // Run the query to update those values.
-      targetModel.update(sourceId, toUpdate, {multi: true}, done);
-    } else {
-      done(null, this);
+      promises.add(targetModel.update(find, update, {multi: true}));
     }
+
+    return Promise.all(promises).then(done);
   };
 
 

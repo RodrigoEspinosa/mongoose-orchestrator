@@ -1,14 +1,6 @@
 const mongoose = require('mongoose');
 
 /**
- * Join a iterator with given link or use ',' as default.
- * @param  {Object} iterator
- * @param  {String} link=',' [description]
- * @return {String}
- */
-const joinIterator = (iterator, link=',') => Array.from(iterator).join(link);
-
-/**
  * Get a Mongoose model based on the passed schema.
  * Returns the model contructor.
  * @param   {Object} schema
@@ -28,4 +20,4 @@ const getModelBySchema = (schema) => {
   }
 };
 
-export {joinIterator, getModelBySchema};
+export { getModelBySchema };
