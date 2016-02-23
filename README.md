@@ -3,6 +3,7 @@
 
 **Keep your _references to attributes_ synchronized.**
 
+[![npm version](https://badge.fury.io/js/mongoose-orchestrator.svg)](https://badge.fury.io/js/mongoose-orchestrator)
 [![Build Status](https://travis-ci.org/RodrigoEspinosa/mongoose-orchestrator.svg?branch=master)](https://travis-ci.org/RodrigoEspinosa/mongoose-orchestrator)
 [![Dependency Status](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator.svg)](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator)
 [![devDependency Status](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator/dev-status.svg)](https://david-dm.org/RodrigoEspinosa/mongoose-orchestrator#info=devDependencies)
