@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Show, Season, Episode } from './models';
+import { User, Show, Season, Episode } from './models';
 
 
 /**
@@ -97,6 +97,28 @@ describe('When updating the source', function() {
       .then(checkEpisodesSeasonNames('Season 2 - CHANGED'))
       .then(done)
       .catch(console.error);
+  });
+
+  it('should run transformations', function(done) {
+    // Create a new user.
+    const user = new User({name: 'Rodrigo'});
+
+    // Create a new show associated with that user.
+    const show = new Show({created_by: user._id, name: 'Testing Show'});
+
+    user.save()
+      .then(show.save)
+      .then(() => {
+        // Change the user name.
+        user.name = 'Superman';
+        return user.save();
+      })
+      .then(() => Show.findById(show._id))
+      .then((show) => {
+        expect(show.created_by_initial).to.equal('S');
+        done();
+      })
+      .catch(done);
   });
 
 });

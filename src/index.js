@@ -43,8 +43,20 @@ const orchestratorPlugin = function(schema) {
       // Get the source attribute where the `ObjectId` for the specified model.
       const source = schemaType.options.source || model.toLowerCase();
 
+      let transformation;
+
+      if (typeof schemaType.options.transformation === 'function') {
+        transformation = schemaType.options.transformation;
+      } else {
+        transformation = function(value) { return value; };
+      }
+
       // Build the object with the data so it can synchronize.
-      const syncData = { attribute: attr, source: source };
+      const syncData = {
+        attribute: attr,
+        source: source,
+        transformation: transformation
+      };
 
       // Set the map for reference-to-attribute population.
       addPathToSync(model, pathName, syncData);
@@ -100,7 +112,7 @@ const orchestratorPlugin = function(schema) {
 
         // Iterate over all the paths to sync.
         for (let [ownPathToSync, syncData] of pathsToSync) {
-          const {attribute: sourceAttribute, source: idSource} = syncData;
+          const {attribute: sourceAttribute, source: idSource, transformation: transformation} = syncData;
 
           // Get the corresponding reference based on the id.
           const sourceId = _.get(this, idSource);
@@ -109,7 +121,9 @@ const orchestratorPlugin = function(schema) {
           });
 
           // Copy the value of the reference attribute to the current instance.
-          _.set(this, ownPathToSync, _.get(reference, sourceAttribute));
+          let value = _.get(reference, sourceAttribute);
+          value = transformation(value);
+          _.set(this, ownPathToSync, value);
         }
 
         // Always resolve the promise.
@@ -159,13 +173,17 @@ const orchestratorPlugin = function(schema) {
 
     // Iterate over all the paths to sync.
     for (let [targetAttribute, syncData] of pathsToSync) {
-      const {attribute: sourceAttribute, source: idSource} = syncData;
+      const {attribute: sourceAttribute, source: idSource, transformation: transformation} = syncData;
 
       const toUpdateAttrs = toUpdate.get(idSource) || {};
 
       // Add the attribute to the update list if this was modified.
       if(this.isModified(sourceAttribute)) {
-        const newValue = _.get(this, sourceAttribute);
+        // Get the original value.
+        let newValue = _.get(this, sourceAttribute);
+
+        // Apply the transformation.
+        newValue = transformation(newValue);
 
         _.set(toUpdateAttrs, targetAttribute, newValue);
       }

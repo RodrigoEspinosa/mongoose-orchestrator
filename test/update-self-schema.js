@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Show, Season, Episode } from './models';
+import { User, Show, Season, Episode } from './models';
 
 
 /**
@@ -70,6 +70,23 @@ describe('When updating self schema', function() {
       .then((season) => {
         expect(season.show.title).to.equal('Testing Show');
         expect(season.show.amountOfSeasons).to.equal(4);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should run transformations', function(done) {
+    // Create a new user.
+    const user = new User({name: 'Rodrigo'});
+
+    // Create a new show associated with that user.
+    const show = new Show({created_by: user._id, name: 'Testing Show'});
+
+    user.save()
+      .then(show.save)
+      .then(Show.findById(show._id))
+      .then((show) => {
+        expect(show.created_by_initial).to.equal('R');
         done();
       })
       .catch(done);

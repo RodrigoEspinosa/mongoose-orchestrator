@@ -5,13 +5,43 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 import mongooseOrchestrator from '../src/index';
 
 
-const ShowSchema = new mongoose.Schema({
-  name: {type: String, required: true},
+// Create and register the `User` model.
 
-  seasons: {type: Number, default: 1}
+const UserSchema = new mongoose.Schema({
+  name: {type: String, required: true}
 
 });
 
+const User = mongoose.model('User', UserSchema);
+
+// Create and register the `Show` model.
+
+const ShowSchema = new mongoose.Schema({
+  name: {type: String, required: true},
+
+  seasons: {type: Number, default: 1},
+
+  created_by: {
+    type: ObjectId,
+    ref: 'User'
+  },
+  created_by_initial: {
+    type: String,
+    sync: true,
+    ref: 'User.name',
+    source: 'created_by',
+    transformation: function(name) {
+      if (name && name.length > 0) {
+        return name[0];
+      }
+
+      return '';
+    }
+  }
+
+});
+
+ShowSchema.plugin(mongooseOrchestrator);
 const Show = mongoose.model('Show', ShowSchema);
 
 
@@ -64,4 +94,4 @@ EpisodeSchema.plugin(mongooseOrchestrator);
 
 const Episode = mongoose.model('Episode', EpisodeSchema);
 
-export { Show, Season, Episode };
+export { User, Show, Season, Episode };

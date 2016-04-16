@@ -70,6 +70,45 @@ mongoose.Schema({
 });
 ```
 
+_Default:_ `modelName.toLowerCase()`;
+
+**Transformations**
+
+Set a transformation for the referenced attribute. This function will be
+applied to the value before persisting it.
+
+```js
+mongoose.Schema({
+
+  name: { type: String, required: true },
+
+  country: {
+    id: {
+      type: ObjectId,
+      ref: 'Country'
+    },
+    name: {
+      type: String,
+      ref: 'Country.name',
+      sync: true,
+      source: 'country.id'
+    },
+    nameInitial: {
+      type: String,
+      ref: 'Country.name',
+      sync: true,
+
+      // Set the transformation function.
+      transformation: function(value) {
+        return (value.length) ? value[0] : '';
+      }
+    }
+  }
+
+});
+```
+
+_Default:_ `function (value) { return value; }`.
 
 ## Example
 
